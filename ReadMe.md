@@ -36,32 +36,32 @@ entries are just as if I had a massive fuel tank in my car.
 
 ### Adding entries
 
-To add an entry, type *add*. The system will prompt you for distance, volume,
+To add an entry, type `add`. The system will prompt you for distance, volume,
 price per liter, and date. The distance can be left empty, or set to 0.0 if
 it's an incomplete entry.
 
 ### Listing entries
 
-*list* will show you all entries in the log. The output is paginated to, but
-you can add the number of entries per page to the command: *list 25* will show
+`list` will show you all entries in the log. The output is paginated to, but
+you can add the number of entries per page to the command: `list 25` will show
 25 entries per page.
 
 ### Editing entries
 
-The *edit* command allows you to change any parameter of an entry. You will be
+The `edit` command allows you to change any parameter of an entry. You will be
 prompted for the entry to edit, and all its values. You can also supply the
-number of the entry to edit: *edit 12* will edit entry 12.
+number of the entry to edit: `edit 12` will edit entry 12.
 
 ### Deleting entries
 
-To delete an entry, just type *del*. The system will ask you which entry to
+To delete an entry, just type `del`. The system will ask you which entry to
 delete. You can also suplly the number of the entry to delete after the
-command: *del 42* will delete entry 42.
+command: `del 42` will delete entry 42.
 
 
 ## Processing
 
-When listing all the entries with *list*, you will see that for all complete
+When listing all the entries with `list`, you will see that for all complete
 entries, the km per liter and liter per 100km is shown. Those are the most
 common measurements for fuel consumption. Incomplete entries will not receive a
 calculated mileage, and the first complete entry afterwards will have a skewed
@@ -70,16 +70,16 @@ not the volume or price.
 
 ### Calculating the entries
 
-Using the *calc* command will show you a similar output to *list*, but it will
+Using the `calc` command will show you a similar output to `list`, but it will
 merge the incomplete entries with the next complete entry. You can recognize
 these entries by the 'combined' instead of the number.
 
-As with the *list* command, you can also supply the number of lines per page
-with the *calc* command
+As with the `list` command, you can also supply the number of lines per page
+with the `calc` command
 
 ### Calculating the total
 
-To calculate the total average mileage, use the *total* command.
+To calculate the total average mileage, use the `total` command.
 
 ## Installing and running
 
@@ -91,8 +91,6 @@ Fuel Log requires:
 
 ### Running
 
-To run Fuel log, type:
-> fuel.py
+To run Fuel log, type: `fuel.py`
 
-To quit, type *quit* at the 'Fuel> ' prompt
-
+To quit, type `quit` at the 'Fuel> ' prompt
