@@ -1,0 +1,7 @@
+Fuel Consumption Log
+
+This program stores your fuel consumption entries and can calculate your mean
+mileage.
+This is just a first draft using the following parts:
+* sqlalchemy
+* cmd
