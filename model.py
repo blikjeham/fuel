@@ -61,7 +61,7 @@ class FuelEntry(Base):
             return self.liters / (self.distance / 100)
 
     def __repr__(self):
-        ret = '{id:8}: {d} {l:6.02f} l/{k:7.02f} km a {p:5.03f} cent'.format(
+        ret = '{id:8}: {d} {l:6.02f} l/{k:7.02f} km a {p:5.03f} euro/l'.format(
             id=self.id if self.id is not None else 'combined',
             d=self.date, l=self.liters,
             k=self.distance, p=self.price)

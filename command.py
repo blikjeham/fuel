@@ -32,7 +32,8 @@ def combine_entries(entry):
         date=ie.date, full=True)
 
 
-def calculate_entries(session):
+def calculate_entries(session, num_lines=None):
+    out = ui.OutputLines()
     for entry in session.query(model.FuelEntry):
         if not entry.full:
             incomplete_queue.append(entry)
@@ -40,7 +41,9 @@ def calculate_entries(session):
 
         if len(incomplete_queue):
             entry = combine_entries(entry)
-        print(entry)
+        out.append(entry)
+
+    out.output(num_lines=num_lines)
 
 
 def total(session):
@@ -62,9 +65,9 @@ def total(session):
         total_price += entry.liters * entry.price
         total_distance += entry.distance
 
-    print(model.FuelEntry(
+    return model.FuelEntry(
         liters=total_liters, price=total_price, distance=total_distance,
-        date=datetime.date.today(), full=True))
+        date=datetime.date.today(), full=True)
 
 
 class FuelCommand(cmd.Cmd):
@@ -78,6 +81,9 @@ class FuelCommand(cmd.Cmd):
         if command is not None:
             command = command.lower()
         return command, arg, line
+
+    def emptyline(self):
+        pass
 
     def do_add(self, line):
         date = ui.prompt_date('Date', default=datetime.date.today())
@@ -96,10 +102,17 @@ class FuelCommand(cmd.Cmd):
         print('add\n\nAdd an entry to the fuel log')
 
     def do_calc(self, line):
-        calculate_entries(self.session)
+        num_lines = None
+        if line:
+            try:
+                num_lines = int(line)
+            except ValueError:
+                num_lines = None
+        calculate_entries(self.session, num_lines=num_lines)
 
     def help_calc(self):
-        print('calc\n\nCalculate the fuel entries')
+        print('calc [number_of_lines]\n\nCalculate the fuel entries')
+        print('number_of_lines defaults to {}'.format(ui.DEFAULT_MAX_LINES))
 
     def do_del(self, line):
         id = line if len(line) else None
@@ -169,14 +182,27 @@ class FuelCommand(cmd.Cmd):
         print('import [filename]\n\nImport records from CSV file')
 
     def do_list(self, line):
+        num_lines = None
+        if line:
+            try:
+                num_lines = int(line)
+            except ValueError:
+                num_lines = None
+        out = ui.OutputLines()
         for entry in self.session.query(model.FuelEntry):
-            print(entry)
+            out.append(entry)
+
+        out.output(num_lines=num_lines)
 
     def help_list(self):
-        print('list\n\nList the entries in the Fuel Log')
+        print('list [number_of_lines]\n\nList the entries in the Fuel Log')
+        print('number_of_lines defaults to {}'.format(ui.DEFAULT_MAX_LINES))
 
     def do_total(self, line):
-        total(self.session)
+        print(total(self.session))
+
+    def help_total(self):
+        print('total\n\nCalculate and print the total stats')
 
     # line do_EOF(self, line):
     #     print('')

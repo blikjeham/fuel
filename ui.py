@@ -1,8 +1,17 @@
 import datetime
 
+DEFAULT_MAX_LINES = 10
 
 def wait_prompt():
-    value = input(str(InputLine('Press any key', prompt_char='...')))
+    value = input(str(InputLine('Press return', prompt_char='...')))
+
+
+def more_prompt():
+    value = input(str(InputLine(
+        '--- press q to quit, or return to continue ---')))
+    if value.lower() in ['q']:
+        return False
+    return True
 
 
 def prompt(line, default=None, allow_empty=False, **kwargs):
@@ -91,3 +100,42 @@ class InputLine(object):
 
     def __str__(self):
         return str(self.__unicode__())
+
+
+class OutputLines(object):
+    buffer = None
+    lines = 0
+
+    def __init__(self, lines=None):
+        self.buffer = []
+        if lines is not None:
+            self.append(lines)
+
+    def append(self, lines):
+        if self.buffer is None:
+            self.buffer = []
+
+        if not isinstance(lines, list):
+            lines = [lines]
+
+        for line in lines:
+            if not isinstance(line, str):
+                line = str(line)
+
+            self.buffer.append(line)
+            self.lines += 1
+
+    def output(self, num_lines=DEFAULT_MAX_LINES):
+        if num_lines is None:
+            num_lines = DEFAULT_MAX_LINES
+
+        index = 1
+        for line in self.buffer:
+            if index > num_lines:
+                if not more_prompt():
+                    self.buffer = None
+                    return
+                index = 1
+            index += 1
+            print(line)
+        self.buffer = None
