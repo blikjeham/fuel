@@ -8,6 +8,7 @@ from db import Session
 
 incomplete_queue = []
 
+
 def combine_entries(entry):
     global incomplete_queue
     total_liters = 0.0
@@ -145,7 +146,6 @@ class FuelCommand(cmd.Cmd):
 
     def help_edit(self):
         print('edit [id]\n\nEdit an entry')
-
 
     def do_flush(self, line):
         if ui.prompt_bool('Are you sure you wish to flush the Fuel Log',

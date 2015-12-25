@@ -1,5 +1,6 @@
 import datetime
 
+
 def wait_prompt():
     value = input(str(InputLine('Press any key', prompt_char='...')))
 
@@ -17,6 +18,7 @@ def prompt(line, default=None, allow_empty=False, **kwargs):
         return prompt(line, default)
     else:
         return None
+
 
 def prompt_float(line, default=None, allow_empty=False, **kwargs):
     if not isinstance(line, InputLine):
@@ -36,6 +38,7 @@ def prompt_float(line, default=None, allow_empty=False, **kwargs):
         except ValueError:
             return prompt_float(line, default)
 
+
 def prompt_date(line, **kwargs):
     value = prompt(line, **kwargs)
     if not isinstance(value, datetime.date):
@@ -44,6 +47,7 @@ def prompt_date(line, **kwargs):
         except ValueError:
             value = datetime.date.today()
     return value
+
 
 def prompt_bool(line, default=False):
     if not isinstance(line, InputLine):
@@ -87,4 +91,3 @@ class InputLine(object):
 
     def __str__(self):
         return str(self.__unicode__())
-

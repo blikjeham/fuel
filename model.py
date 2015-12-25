@@ -5,6 +5,7 @@ import datetime
 
 Base = declarative_base()
 
+
 def parse_date(line):
     try:
         return datetime.datetime.strptime(line, '%d/%m/%y')
@@ -39,6 +40,7 @@ def import_entries(filename):
 class FuelError(Exception):
     pass
 
+
 class FuelEntry(Base):
 
     __tablename__ = 'fuel_entries'
@@ -61,7 +63,7 @@ class FuelEntry(Base):
     def __repr__(self):
         ret = '{id:8}: {d} {l:6.02f} l/{k:7.02f} km a {p:5.03f} cent'.format(
             id=self.id if self.id is not None else 'combined',
-            d=self.date,l=self.liters,
+            d=self.date, l=self.liters,
             k=self.distance, p=self.price)
         if self.full:
             ret += ' ({:5.2f} | {:4.1f})'.format(self.kmpl(), self.lphkm())
