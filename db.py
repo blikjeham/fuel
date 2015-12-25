@@ -19,7 +19,6 @@ def _is_configured(path):
 
 def configure_session(path='fuel.db'):
     engine = create_engine('sqlite:///{}'.format(path), echo=False)
-    Session = sessionmaker(engine)
     Session.configure(bind=engine)
     if not _is_configured(path):
         _configure_database(engine)
