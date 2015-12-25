@@ -2,6 +2,7 @@ import datetime
 
 DEFAULT_MAX_LINES = 10
 
+
 def wait_prompt():
     value = input(str(InputLine('Press return', prompt_char='...')))
 

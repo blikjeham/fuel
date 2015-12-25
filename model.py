@@ -37,10 +37,6 @@ def import_entries(filename):
     return entry_list
 
 
-class FuelError(Exception):
-    pass
-
-
 class FuelEntry(Base):
 
     __tablename__ = 'fuel_entries'
@@ -71,26 +67,3 @@ class FuelEntry(Base):
             ret += ' ( incomplete )'
 
         return ret
-
-
-class FuelLog:
-
-    def __init__(self):
-        self.entries = []
-        self.liters = 0
-        self.distance = 0
-        self.price = 0
-
-    def add_entry(self, entry):
-        if not isinstance(entry, FuelEntry):
-            raise FuelError('Not a FuelEntry')
-        self.entries.append(entry)
-        self.add_metrics(entry)
-
-    def add_metrics(self, entry):
-        self.liters += entry.liters
-        self.distance += entry.distance
-        self.price += entry.price
-
-    def __str__(self):
-        return '{} km/liter'.format(self.distance/self.liters)
