@@ -1,6 +1,7 @@
 import datetime
+import getpass
 
-DEFAULT_MAX_LINES = 10
+DEFAULT_MAX_LINES = 40
 
 
 def wait_prompt():
@@ -28,6 +29,12 @@ def prompt(line, default=None, allow_empty=False, **kwargs):
         return prompt(line, default)
     else:
         return None
+
+
+def prompt_pass(line):
+    if not isinstance(line, InputLine):
+        line = InputLine(line)
+    return getpass.getpass(line)
 
 
 def prompt_float(line, default=None, allow_empty=False, **kwargs):
@@ -72,14 +79,27 @@ def prompt_bool(line, default=False):
         return default
 
 
+def prompt_choice(line, choices=None, default=None):
+    if not isinstance(line, InputLine):
+        line = InputLine(line, default=default, choices=choices)
+
+    value = input(line).strip().lower()
+    for choice in line.choices:
+        if value == str(choice[0]):
+            return choice[0]
+    return prompt_choice(line, choices=choices, default=default)
+
+
 class InputLine(object):
-    def __init__(self, line, default=None, prompt_char=': '):
+    def __init__(self, line, default=None, prompt_char=': ', choices=None):
         self.line = line
         self.default = default
         self.prompt_char = prompt_char
+        self.choices = choices
 
     def default_string(self):
-        if self.default is None:
+        print(self.choices)
+        if self.default is None and self.choices is None:
             return ''
 
         # set booleans
@@ -88,11 +108,13 @@ class InputLine(object):
                 'Y' if self.default else 'y',
                 'n' if self.default else 'N'
             )
+        elif self.choices is not None:
+            return '/'.join(['{}'.format(c[0]) for c in self.choices])
         else:
             return self.default
 
     def __unicode__(self):
-        if self.default is not None:
+        if self.default is not None or self.choices is not None:
             return '{} [{}]{}'.format(
                 self.line, self.default_string(),
                 self.prompt_char)
@@ -112,16 +134,30 @@ class OutputLines(object):
         if lines is not None:
             self.append(lines)
 
-    def append(self, lines):
+    def _assure_buffer(self):
         if self.buffer is None:
             self.buffer = []
 
+    def append(self, lines):
+        self._assure_buffer()
         if not isinstance(lines, list):
             lines = [lines]
 
         for line in lines:
             if not isinstance(line, str):
                 line = str(line)
+
+            self.buffer.append(line)
+            self.lines += 1
+
+    def append_csv(self, lines):
+        self._assure_buffer()
+        if not isinstance(lines, list):
+            lines = [lines]
+
+        for line in lines:
+            if not isinstance(line, str):
+                line = line.csv()
 
             self.buffer.append(line)
             self.lines += 1
@@ -139,4 +175,11 @@ class OutputLines(object):
                 index = 1
             index += 1
             print(line)
+        self.buffer = None
+
+
+    def csv(self, filename):
+        with open(filename, 'w+') as f:
+            for line in self.buffer:
+                f.write(line + '\n')
         self.buffer = None

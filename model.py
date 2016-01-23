@@ -1,5 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, Boolean, Date
+from sqlalchemy_utils.types.choice import ChoiceType
+from sqlalchemy_utils.types.password import PasswordType
+from sqlalchemy.orm import relationship
+import sqlalchemy as sa
 
 import datetime
 
@@ -10,28 +13,32 @@ def parse_date(line):
     try:
         return datetime.datetime.strptime(line, '%d/%m/%y')
     except ValueError as e:
-        print(e)
-        return datetime.date.today()
+        try:
+            return datetime.datetime.strptime(line, '%Y-%m-%d')
+        except ValueError as e:
+            print(e)
+            return datetime.date.today()
 
 
-def parse_line(line):
+def parse_line(line, car):
     line = line.split(',')
+    car = int(1)
     date = parse_date(line[0])
     distance = float(line[1]) if len(line[1]) else float(0.0)
     liters = float(line[2])
     price = float(line[3])
     return FuelEntry(
-        liters=liters, price=price, distance=distance,
-        date=date, full=not not distance)
+        car=car, liters=liters, price=price,
+        distance=distance, date=date, full=not not distance)
 
 
-def import_entries(filename):
+def import_entries(filename, car):
     entry_list = []
     with open(filename, 'r') as f:
         for line in f.readlines():
             if ',' not in line:
                 continue
-            entry = parse_line(line)
+            entry = parse_line(line, car)
             if entry:
                 entry_list.append(entry)
     return entry_list
@@ -41,12 +48,13 @@ class FuelEntry(Base):
 
     __tablename__ = 'fuel_entries'
 
-    id = Column(Integer, primary_key=True)
-    liters = Column(Float)
-    price = Column(Float)
-    distance = Column(Float)
-    full = Column(Boolean)
-    date = Column(Date)
+    id = sa.Column(sa.Integer, primary_key=True)
+    car = sa.Column(sa.Integer, sa.ForeignKey('cars.id'))
+    liters = sa.Column(sa.Float)
+    price = sa.Column(sa.Float)
+    distance = sa.Column(sa.Float)
+    full = sa.Column(sa.Boolean)
+    date = sa.Column(sa.Date)
 
     def kmpl(self):
         if self.full:
@@ -66,4 +74,48 @@ class FuelEntry(Base):
         else:
             ret += ' ( incomplete )'
 
+        return ret
+
+    def csv(self, delim=','):
+        '''Output character separated values'''
+        ret = '{d},{k:.02f},{l:.02f},{p:.03f}'.format(
+            d=self.date, k=self.distance,
+            l=self.liters, p=self.price)
+        return ret
+
+class Car(Base):
+
+    __tablename__ = 'cars'
+
+    TYRES = [
+        ('w', 'Winter tyres'),
+        ('s', 'Summer tyres'),
+        ('a', 'All-weather tyres')
+    ]
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    licence = sa.Column(sa.Unicode(30))
+    tyres = sa.Column(ChoiceType(TYRES, impl=sa.Unicode(5)))
+    owner_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
+    fuel_entries = relationship('FuelEntry')
+
+    def __repr__(self):
+        ret = '{id:8}: {l} ({t})'.format(
+            id=self.id, l=self.licence, t=self.tyres.code)
+        return ret
+
+
+class User(Base):
+
+    __tablename__ = 'users'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    username = sa.Column(sa.Unicode(255))
+    password = sa.Column(PasswordType(schemes=['pbkdf2_sha512']))
+    cars = relationship('Car')
+    admin = sa.Column(sa.Boolean)
+    last_login = sa.Column(sa.DateTime)
+
+    def __repr__(self):
+        ret = '{id:8}: {name}'.format(id=self.id, name=self.username)
         return ret
